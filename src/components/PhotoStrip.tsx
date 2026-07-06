@@ -1,13 +1,19 @@
-"use client";
+'use client';
 
-import { Camera, Heart } from "lucide-react";
+import { Camera, Heart } from 'lucide-react';
 import {
   formatCoupleNames,
   formatFooter,
   getGridLayout,
   type PhotoCount,
-} from "@/lib/gridLayout";
-import { getStickerEmoji, type StickerPlacement } from "@/lib/stickers";
+} from '@/lib/gridLayout';
+import { getStickerEmoji, type StickerPlacement } from '@/lib/stickers';
+import {
+  THEMES,
+  FILTERS,
+  type ThemeId,
+  type FilterId,
+} from '@/lib/customization';
 
 type PhotoStripProps = {
   photos: string[];
@@ -19,6 +25,9 @@ type PhotoStripProps = {
   interactive?: boolean;
   selectedSticker?: boolean;
   onPhotoClick?: (index: number, x: number, y: number) => void;
+  theme?: ThemeId;
+  filter?: FilterId;
+  showDate?: boolean;
 };
 
 export function PhotoStrip({
@@ -31,14 +40,16 @@ export function PhotoStrip({
   interactive = false,
   selectedSticker = false,
   onPhotoClick,
+  theme = 'pink',
+  filter = 'none',
+  showDate = false,
 }: PhotoStripProps) {
   const { cols, rows } = getGridLayout(photoCount);
   const title = formatCoupleNames(name1, name2);
+  const themeConfig = THEMES[theme];
+  const filterConfig = FILTERS[filter];
 
-  const handleClick = (
-    index: number,
-    e: React.MouseEvent<HTMLDivElement>,
-  ) => {
+  const handleClick = (index: number, e: React.MouseEvent<HTMLDivElement>) => {
     if (!interactive || !onPhotoClick || !photos[index]) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -46,32 +57,46 @@ export function PhotoStrip({
     onPhotoClick(index, x, y);
   };
 
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   return (
     <div
-      className="relative w-full max-w-xs sm:max-w-sm"
-      aria-label="Photo strip preview"
+      className='relative w-full max-w-xs sm:max-w-sm'
+      aria-label='Photo strip preview'
     >
       <div
         className={`relative overflow-hidden rounded-2xl border-4 bg-white p-3 shadow-xl transition-colors duration-500 ${
           complete
-            ? "border-pink-deep shadow-pink-deep/25"
-            : "border-pink-soft shadow-pink-soft/20"
+            ? `${themeConfig.borderClass} shadow-current/25`
+            : 'border-pink-soft shadow-pink-soft/20'
         }`}
-        style={{ aspectRatio: "2 / 3" }}
+        style={{ aspectRatio: '2 / 3' }}
       >
-        <div className="mb-2 flex items-center justify-center gap-2 border-b border-dashed border-pink-soft/60 pb-2">
-          <Heart className="h-3 w-3 fill-pink-deep text-pink-deep" aria-hidden />
+        {/* Header */}
+        <div className='mb-2 flex items-center justify-center gap-2 border-b border-dashed border-current/20 pb-2'>
+          <Heart
+            className={`h-3 w-3 fill-current ${themeConfig.textClass}`}
+            aria-hidden
+          />
           <span
-            className="truncate text-base text-pink-deep sm:text-lg"
-            style={{ fontFamily: "var(--font-pacifico)" }}
+            className={`truncate text-base sm:text-lg ${themeConfig.textClass}`}
+            style={{ fontFamily: 'var(--font-pacifico)' }}
           >
             {title}
           </span>
-          <Heart className="h-3 w-3 fill-pink-deep text-pink-deep" aria-hidden />
+          <Heart
+            className={`h-3 w-3 fill-current ${themeConfig.textClass}`}
+            aria-hidden
+          />
         </div>
 
+        {/* Photo grid */}
         <div
-          className="grid h-[calc(100%-2.75rem)] gap-1.5"
+          className='grid h-[calc(100%-2.75rem)] gap-1.5'
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
             gridTemplateRows: `repeat(${rows}, 1fr)`,
@@ -84,21 +109,21 @@ export function PhotoStrip({
             return (
               <div
                 key={i}
-                role={interactive && photo ? "button" : undefined}
+                role={interactive && photo ? 'button' : undefined}
                 tabIndex={interactive && photo ? 0 : undefined}
                 onClick={(e) => handleClick(i, e)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                  if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     onPhotoClick?.(i, 50, 50);
                   }
                 }}
-                className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-lavender/40 to-pink-soft/30 ${
+                className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${themeConfig.bgGradientClass} ${
                   interactive && photo && selectedSticker
-                    ? "cursor-crosshair ring-2 ring-pink-deep/40 ring-offset-1"
+                    ? `cursor-crosshair ring-2 ${themeConfig.ringClass} ring-offset-1`
                     : interactive && photo
-                      ? "cursor-pointer hover:ring-2 hover:ring-pink-soft/60"
-                      : ""
+                      ? 'cursor-pointer hover:ring-2 hover:ring-pink-soft/60'
+                      : ''
                 }`}
               >
                 {photo ? (
@@ -106,20 +131,29 @@ export function PhotoStrip({
                   <img
                     src={photo}
                     alt={`Couple photo ${i + 1}`}
-                    className="pointer-events-none h-full w-full object-cover"
+                    className='pointer-events-none h-full w-full object-cover'
+                    style={{
+                      filter:
+                        filterConfig.css === 'none'
+                          ? undefined
+                          : filterConfig.css,
+                    }}
                     draggable={false}
                   />
                 ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-foreground/30">
-                    <Camera className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.5} />
-                    <span className="text-xs font-semibold">{i + 1}</span>
+                  <div className='flex h-full w-full flex-col items-center justify-center gap-1 text-foreground/30'>
+                    <Camera
+                      className='h-5 w-5 sm:h-6 sm:w-6'
+                      strokeWidth={1.5}
+                    />
+                    <span className='text-xs font-semibold'>{i + 1}</span>
                   </div>
                 )}
 
                 {stickers.map((sticker) => (
                   <span
                     key={sticker.id}
-                    className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 select-none drop-shadow-md"
+                    className='pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 select-none drop-shadow-md'
                     style={{
                       left: `${sticker.x}%`,
                       top: `${sticker.y}%`,
@@ -131,7 +165,9 @@ export function PhotoStrip({
                   </span>
                 ))}
 
-                <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-[10px] font-bold text-pink-deep">
+                <span
+                  className={`absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-[10px] font-bold ${themeConfig.textClass}`}
+                >
                   {i + 1}
                 </span>
               </div>
@@ -139,15 +175,23 @@ export function PhotoStrip({
           })}
         </div>
 
+        {/* Footer */}
         {complete && (
-          <p className="mt-2 truncate text-center text-[10px] font-semibold tracking-wider text-foreground/40 uppercase">
-            {formatFooter(name1, name2)}
-          </p>
+          <div className='mt-2 text-center'>
+            <p className='truncate text-[10px] font-semibold tracking-wider text-foreground/40 uppercase'>
+              {formatFooter(name1, name2)}
+            </p>
+            {showDate && (
+              <p className='text-[9px] font-medium tracking-wider text-foreground/30 uppercase'>
+                {dateStr}
+              </p>
+            )}
+          </div>
         )}
       </div>
 
       <div
-        className="absolute -top-2 left-1/2 h-6 w-16 -translate-x-1/2 rounded-sm bg-peach/70 shadow-sm"
+        className='absolute -top-2 left-1/2 h-6 w-16 -translate-x-1/2 rounded-sm bg-peach/70 shadow-sm'
         aria-hidden
       />
     </div>
