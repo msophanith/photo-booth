@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fff5f8;
+  --foreground: #5c3d4e;
+  --pink-soft: #ffb7c5;
+  --pink-deep: #ff8fab;
+  --lavender: #e8d5f5;
+  --lavender-deep: #c9a8e8;
+  --cream: #fff9f5;
+  --mint: #b8f0d8;
+  --peach: #ffd4b8;
+  --strip-bg: #ffffff;
+  --strip-border: #ffb7c5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-pink-soft: var(--pink-soft);
+  --color-pink-deep: var(--pink-deep);
+  --color-lavender: var(--lavender);
+  --color-lavender-deep: var(--lavender-deep);
+  --color-cream: var(--cream);
+  --color-mint: var(--mint);
+  --color-peach: var(--peach);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-pacifico);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes countdown-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-countdown-pop {
+  animation: countdown-pop 0.5s ease-out forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-soft,
+  .animate-countdown-pop,
+  .animate-sparkle {
+    animation: none;
+  }
+}
